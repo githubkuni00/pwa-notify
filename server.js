@@ -61,6 +61,9 @@ app.get("/main.js", (req, res) => {
 app.get("/sw.js", (req, res) => {
   res.sendFile(__dirname + "/sw.js");
 });
+app.get("/about", (req, res) => {
+  res.send("Hello from about")
+});
 
 const port = process.env.PORT || 3000;
 
