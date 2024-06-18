@@ -8,11 +8,14 @@ const PushNotifications = require("node-pushnotifications");
 const app = express();
 
 // Mengaktifkan middleware CORS
-app.use(cors());
+const corsOptions = {
+  origin: ['https://pwa-notify.vercel.app', 'https://pwa-notify.vercel.app/subscribe'],
+  methods: "GET,POST",
+  allowedHeaders: "*",
+  credentials: true
+};
 
-app.use(cors({
-  origin: 'https://pwa-notify.vercel.app/'
-}));
+app.use(cors(corsOptions));
 
 // Set static path
 app.use(express.static(path.join(__dirname, "client")));
