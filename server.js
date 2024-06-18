@@ -7,43 +7,16 @@ const PushNotifications = require("node-pushnotifications");
 
 const app = express();
 
-// Mengaktifkan middleware CORS
-const corsOptions = {
-  origin: ['https://pwa-notify.vercel.app', 'https://pwa-notify.vercel.app/subscribe'],
-  methods: "GET,POST",
-  allowedHeaders: "*",
-  credentials: true
-};
-
-app.use(cors(corsOptions));
+// Mengaktifkan middleware CORS tanpa pembatasan endpoint
+app.use(cors());
 
 // Set static path
 app.use(express.static(path.join(__dirname, "client")));
 
 app.use(bodyParser.json());
-app.use(function (req, res, next) {
-  // Website you wish to allow to connect
-  res.setHeader("Access-Control-Allow-Origin", "*");
-
-  // Request methods you wish to allow
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, OPTIONS, PUT, PATCH, DELETE"
-  );
-
-  // Request headers you wish to allow
-  res.setHeader("Access-Control-Allow-Headers", "*");
-
-  // Set to true if you need the website to include cookies in the requests sent
-  // to the API (e.g. in case you use sessions)
-  res.setHeader("Access-Control-Allow-Credentials", true);
-
-  // Pass to next layer of middleware
-  next();
-});
 
 const publicVapidKey = "BF_wXa1EQUAqRFOHc7IFpUMPu2W5u_tRBQH5Jhti_918LTXVppU99I4Cu66bRTGy2rU_M2pVFsKg7r5onl3Ub2A"; // REPLACE_WITH_YOUR_KEY
-const privateVapidKey = "hQaI-8-Boi4_KjR8p3WLvzau0fNyyxq6V-UX5ZDuqIg"; //REPLACE_WITH_YOUR_KEY
+const privateVapidKey = "hQaI-8-Boi4_KjR8p3WLvzau0fNyyxq6V-UX5ZDuqIg"; // REPLACE_WITH_YOUR_KEY
 
 app.post("/subscribe", (req, res) => {
   // Get pushSubscription object
@@ -71,8 +44,10 @@ app.post("/subscribe", (req, res) => {
   push.send(subscription, payload, (err, result) => {
     if (err) {
       console.log(err);
+      res.status(500).send("Error sending push notification");
     } else {
       console.log(result);
+      res.status(200).send("Push notification sent successfully");
     }
   });
 });
@@ -87,6 +62,6 @@ app.get("/sw.js", (req, res) => {
   res.sendFile(__dirname + "/sw.js");
 });
 
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.listen(port, () => console.log(`Server started on port ${port}`));
