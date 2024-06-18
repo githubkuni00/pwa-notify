@@ -7,7 +7,7 @@ const PushNotifications = require("node-pushnotifications");
 
 const app = express();
 
-// Mengaktifkan middleware CORS tanpa pembatasan endpoint
+// Mengaktifkan middleware CORS
 app.use(cors());
 
 // Set static path
@@ -52,6 +52,9 @@ app.post("/subscribe", (req, res) => {
   });
 });
 
+// Handle CORS preflight request
+app.options("/subscribe", cors());
+
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
@@ -61,10 +64,7 @@ app.get("/main.js", (req, res) => {
 app.get("/sw.js", (req, res) => {
   res.sendFile(__dirname + "/sw.js");
 });
-app.get("/about", (req, res) => {
-  res.send("Hello from about")
-});
 
-const port = process.env.PORT || 3000;
+const port = 3000;
 
 app.listen(port, () => console.log(`Server started on port ${port}`));
