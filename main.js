@@ -14,6 +14,13 @@ async function send() {
   });
   console.log("Service Worker Registered...");
 
+  // Check notification permission
+  const permission = await Notification.requestPermission();
+  if (permission !== "granted") {
+    console.error("Permission for notifications not granted");
+    return;
+  }
+
   // Register Push
   console.log("Registering Push...");
   const subscription = await register.pushManager.subscribe({
