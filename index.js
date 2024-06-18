@@ -18,38 +18,56 @@ app.use(bodyParser.json());
 const publicVapidKey = "BF_wXa1EQUAqRFOHc7IFpUMPu2W5u_tRBQH5Jhti_918LTXVppU99I4Cu66bRTGy2rU_M2pVFsKg7r5onl3Ub2A"; // REPLACE_WITH_YOUR_KEY
 const privateVapidKey = "hQaI-8-Boi4_KjR8p3WLvzau0fNyyxq6V-UX5ZDuqIg"; // REPLACE_WITH_YOUR_KEY
 
+// Array to store subscriptions
+let subscriptions = [];
+
 app.post("/subscribe", (req, res) => {
   // Get pushSubscription object
   const subscription = req.body;
-  const settings = {
-    web: {
-      vapidDetails: {
-        subject: "mailto: <cloud.oceanobjectstorage@gmail.com>", // REPLACE_WITH_YOUR_EMAIL
-        publicKey: publicVapidKey,
-        privateKey: privateVapidKey,
+  subscriptions.push(subscription); // Store the subscription
+
+  res.status(201).json({ message: "Subscription added successfully" });
+});
+
+app.post("/send-notification", (req, res) => {
+  const payload = JSON.stringify({ title: "Notification from Knock" });
+
+  subscriptions.forEach((subscription) => {
+    const pushSubscription = {
+      endpoint: subscription.endpoint,
+      keys: {
+        auth: subscription.keys.auth,
+        p256dh: subscription.keys.p256dh
+      }
+    };
+
+    const settings = {
+      web: {
+        vapidDetails: {
+          subject: "mailto: <cloud.oceanobjectstorage@gmail.com>",
+          publicKey: publicVapidKey,
+          privateKey: privateVapidKey,
+        },
+        gcmAPIKey: "gcmkey",
+        TTL: 2419200,
+        contentEncoding: "aes128gcm",
+        headers: {},
       },
-      gcmAPIKey: "gcmkey",
-      TTL: 2419200,
-      contentEncoding: "aes128gcm",
-      headers: {},
-    },
-    isAlwaysUseFCM: false,
-  };
+      isAlwaysUseFCM: false,
+    };
 
-  // Send 201 - resource created
-  const push = new PushNotifications(settings);
+    const push = new PushNotifications(settings);
 
-  // Create payload
-  const payload = { title: "Notification from Knock" };
-  push.send(subscription, payload, (err, result) => {
-    if (err) {
-      console.log(err);
-      res.status(500).send("Error sending push notification");
-    } else {
-      console.log(result);
-      res.status(200).send("Push notification sent successfully");
-    }
+    push.send(pushSubscription, payload, (err, result) => {
+      if (err) {
+        console.error("Error sending push notification:", err);
+      } else {
+        console.log("Push notification sent successfully:", result);
+      }
+    });
   });
+
+  res.status(200).json({ message: "Push notifications sent successfully" });
 });
 
 // Handle CORS preflight request
